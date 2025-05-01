@@ -1,41 +1,59 @@
 
-            pipeline {
+           pipeline {
     agent any
 
-    tools {
-        jdk 'JDK17'        // You must configure this in Jenkins > Global Tool Configuration
-        maven 'Maven3.9'   // You must configure this in Jenkins > Global Tool Configuration
+    environment {
+        // Set up your Java and Maven versions
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17'
+        MAVEN_HOME = 'C:\\Users\\OWNER\\Downloads\\apache-maven-3.9.9'
     }
 
-    environment {
-        PATH = "${tool 'Maven3.9'}/bin:${env.PATH}"
+    tools {
+        // Use Maven and JDK defined in Jenkins configuration
+        maven 'Maven3.9.9'
+        jdk 'JDK17'
     }
 
     stages {
+        stage('Checkout Code') {
+            steps {
+                // Checkout code from the Git repository
+                git 'https://github.com/Kaveri2210/CICD-with-Jenkins'
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Building the project...'
-                sh 'mvn clean compile'
+                // Run Maven clean and test
+                script {
+                    sh "'${MAVEN_HOME}/bin/mvn' clean install"
+                }
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                sh 'mvn test'
+                // Run Maven test phase (run tests)
+                script {
+                    sh "'${MAVEN_HOME}/bin/mvn' test"
+                }
+            }
+        }
+
+        stage('Post Actions') {
+            steps {
+                echo 'Post actions (e.g., notifications) can be done here.'
             }
         }
     }
 
     post {
-        always {
-            echo 'Pipeline completed.'
-        }
         success {
-            echo 'Build and tests succeeded!'
+            echo 'Build and tests successful.'
         }
         failure {
-            echo 'Build or tests failed!'
+            echo 'Build or tests failed.'
         }
     }
 }
+
